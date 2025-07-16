@@ -96,6 +96,29 @@ input.form-control-custom:checked+label::before {
     color: #7c5cc4;
 }
 
+/* This CSS code for Style of the Input of Drag and Drop */
+
+.file-drop-zone {
+    border: 2px dashed #ccc;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.file-drop-zone.dragover {
+    background-color: #f0f8ff;
+    border-color: #007bff;
+}
+.file-drop-zone img {
+    max-width: 150px;
+    margin-top: 10px;
+}
+
+.file-drop-zone:focus {
+    outline: 2px solid #007bff;
+}
+
+
+
 .btn-primary {
     color: color-yiq(#7c5cc4);
     background-color: #7c5cc4;
@@ -313,12 +336,12 @@ a {
 }
 
 @-webkit-keyframes animatebottom {
-  from { bottom:-100px; opacity:0 } 
+  from { bottom:-100px; opacity:0 }
   to { bottom:0px; opacity:1 }
 }
 
-@keyframes animatebottom { 
-  from{ bottom:-100px; opacity:0 } 
+@keyframes animatebottom {
+  from{ bottom:-100px; opacity:0 }
   to{ bottom:0; opacity:1 }
 }
 
@@ -421,7 +444,7 @@ a:focus,button:focus,.btn:focus {
 }
 
 .dashboard-counts {
-	padding: 10px 0; 
+	padding: 10px 0;
 }
 
 .filter-toggle {
@@ -432,7 +455,7 @@ a:focus,button:focus,.btn:focus {
 
 .filter-toggle .date-btn {
 	padding: 0.3rem 0.75rem;
-	border-radius: 15px; 
+	border-radius: 15px;
 }
 
 .filter-toggle .date-btn.active {
@@ -696,7 +719,7 @@ nav.navbar .nav-item li.notifications a i{
 	float: left;
 	vertical-align: middle;
 	width: 30%;
-} 
+}
 
 .dt-buttons {
 	display: inline-block;

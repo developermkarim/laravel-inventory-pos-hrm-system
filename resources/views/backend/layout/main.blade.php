@@ -388,7 +388,7 @@ $general_setting = DB::table('general_settings')->first();
                       </div>
                       <div class="col-md-6 form-group">
                           <label>Image</label>
-                          {{ Form::file('image' , array('class' => 'form-control' , 'required')) }}
+                         <x-file-upload name="image"  label="Upload Category Image" />
                       </div>
                       <div class="col-md-6 form-group">
                           <label>Parent Category</label>
@@ -973,6 +973,85 @@ $general_setting = DB::table('general_settings')->first();
 
         </script>
 
+
+        <script>
+document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
+    const input = dropZone.querySelector('input');
+    const preview = dropZone.querySelector('.preview');
+
+    dropZone.addEventListener('click', () => {
+        input.click();
+    });
+
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            input.files = e.dataTransfer.files;
+            previewFile(file, preview);
+        }
+    });
+
+    // ✅ NEW: Paste from clipboard support
+    dropZone.addEventListener('paste', e => {
+        const items = (e.clipboardData || window.clipboardData).items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                    previewFile(file, preview);
+                }
+            }
+        }
+    });
+
+    // Focus to enable paste event
+    dropZone.addEventListener('focus', () => {
+        dropZone.classList.add('focused');
+    });
+
+    dropZone.addEventListener('blur', () => {
+        dropZone.classList.remove('focused');
+    });
+
+    input.addEventListener('change', () => {
+        if (input.files.length > 0) {
+            previewFile(input.files[0], preview);
+        }
+    });
+
+    // Prevent typing in the editable drop zone
+    dropZone.addEventListener('keydown', e => {
+    // Allow: Tab, Ctrl, Cmd, etc., but block regular typing
+    if (!e.ctrlKey && !e.metaKey && e.key !== "Tab") {
+        e.preventDefault();
+    }
+    
+    });
+
+    function previewFile(file, container) {
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            container.innerHTML = `<img src="${reader.result}" alt="Preview" class="img-fluid rounded mt-2">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
 
 
 </body>
