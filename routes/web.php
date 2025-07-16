@@ -45,14 +45,12 @@ Route::middleware("guest")->group(function(){
 
     Route::controller(CategoryController::class)->group(function(){
 
+        Route::post('import' , 'import')->name('category.import');
     });
-
 
     Route::resource('category', CategoryController::class);
 
 });
-
-
 
 });
 

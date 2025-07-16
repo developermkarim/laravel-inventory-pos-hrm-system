@@ -237,6 +237,8 @@ $general_setting = DB::table('general_settings')->first();
 
     </nav>
 
+     {{ $categories_list }}
+
 <div class="page">
         <!-- navbar-->
             <header class="container-fluid">
@@ -372,7 +374,7 @@ $general_setting = DB::table('general_settings')->first();
       <div id="category-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
           <div role="document" class="modal-dialog">
             <div class="modal-content">
-              <form method="POST" action="http://127.0.0.1:8000/category" accept-charset="UTF-8" enctype="multipart/form-data"><input name="_token" type="hidden" value="50CJUmKUXLX9HVE6xz4XNIvK3luVDRToYiRfUT70">
+             {!! Form::open(['route' => 'category.store', 'method' => 'post', 'file' => true]) !!}
               <div class="modal-header">
                 <h5 id="exampleModalLabel" class="modal-title">Add Category</h5>
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
@@ -382,26 +384,74 @@ $general_setting = DB::table('general_settings')->first();
                   <div class="row">
                       <div class="col-md-6 form-group">
                           <label>Name *</label>
-                          <input required="required" class="form-control" placeholder="Type category name..." name="name" type="text">
+                         {{ Form::text('name' , null, array('required' , 'class' => 'form-control', 'placeholder' => 'Type Category name')) }}
                       </div>
                       <div class="col-md-6 form-group">
                           <label>Image</label>
-                          <input type="file" name="image" class="form-control">
+                          {{ Form::file('image' , array('class' => 'form-control' , 'required')) }}
                       </div>
                       <div class="col-md-6 form-group">
                           <label>Parent Category</label>
-                          <div class="btn-group bootstrap-select form-control"><button type="button" class="btn dropdown-toggle bs-placeholder btn-link" data-toggle="dropdown" role="button" data-id="parent" title="No Parent"><span class="filter-option pull-left">No Parent</span>&nbsp;<span class="bs-caret"><span class="caret"></span></span></button><div class="dropdown-menu open" role="combobox"><div class="dropdown-menu inner" role="listbox" aria-expanded="false"><a tabindex="0" class="dropdown-item selected" data-original-index="0"><span class="dropdown-item-inner " data-tokens="null" role="option" tabindex="0" aria-disabled="false" aria-selected="true"><span class="text">No Parent</span><span class="fa fa-check check-mark"></span></span></a></div></div><select name="parent_id" class="form-control selectpicker" id="parent" tabindex="-98">
-                              <option value="">No Parent</option>
-                                                        </select></div>
+                         <select name="parent_id" class="form-control selectpicker" id="parent">
+
+                            <option value="">No Parent</option>
+                            @foreach ($categories_list as $category)
+
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                         </select>
                       </div>
 
-                                        </div>
+                      @if(\Schema::hasColumn('categories', 'woocommerce_category_id'))
+                      <div class="col-md-6 form-group mt-4">
+                        <h5><input name="is_sync_disable" type="checkbox" id="is_sync_disable" value="1">
+                            &nbsp; Disable Wommcommerce Sync
+                        </h5>
+                      </div>
 
-                                    <div class="form-group">
-                    <input type="submit" value="Submit" class="btn btn-primary">
+                      @endif
+
+                      @if(in_array('ecommerce' , explode(',' , $general_setting->modules)))
+                        <div class="col-md-12 mt-3">
+                            <h6><strong>{{ __('For Website') }}</strong></h6>
+                            <hr>
+                        </div>
+                           <div class="col-md-6 form-group">
+                        <label>{{ __('Icon') }} (SVG format)</label>
+                        <input type="file" name="icon" class="form-control">
+                      </div>
+                      @endif
+
+                    <div class="col-md-6 form-group">
+                          <br>
+                          <input type="checkbox" name="featured" id="featured" value="1"> <label>{{ __('List on category dropdown') }}</label>
+                      </div>
+
                   </div>
+
+            @if(in_array('ecommerce',explode(',',$general_setting->modules)))
+                  <div class="row">
+                      <div class="col-md-12 mt-3">
+                          <h6><strong>{{ __('For SEO') }}</strong></h6>
+                          <hr>
+                      </div>
+                      <div class="col-md-12 form-group">
+                          <label>{{ __('Meta Title') }}</label>
+                          {{Form::text('page_title',null,array('class' => 'form-control', 'placeholder' => 'Meta Title...'))}}
+                      </div>
+                      <div class="col-md-12 form-group">
+                          <label>{{ __('Meta Description') }}</label>
+                          {{Form::text('short_description',null,array('class' => 'form-control', 'placeholder' => 'Meta Description...'))}}
+                      </div>
+                  </div>
+                  @endif
+
+                   <div class="form-group">
+                    <input type="submit" value="{{trans('file.submit')}}" class="btn btn-primary">
+                  </div>
+
               </div>
-              </form>
+             {{ Form::close() }}
             </div>
           </div>
       </div>

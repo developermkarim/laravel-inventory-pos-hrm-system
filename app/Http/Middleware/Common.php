@@ -16,13 +16,14 @@ class Common
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+
     public function handle(Request $request, Closure $next): Response
     {
 
         /* Get General Setting Value */
 
         $general_setting = Cache::remember('general_setting', 60*60*24*365, function(){
-            return DB::table('general_settings')->latest()->first();
+            return   DB::connection('salepro')->table('general_settings')->latest()->first();
         });
 
         /* Setting Theme to Switch Dark to Light or Light to Dark */
@@ -35,10 +36,14 @@ class Common
 
             View::share('theme', 'light');
         }
-        
 
         View::share('general_setting', $general_setting);
 
+        $categories_list = Cache::remember('category_list', 60*60*24*365, function() {
+            return DB::connection('salepro')->table('categories')->where('is_active', true)->get();
+        });
+
+         View::share('categories_list' , $categories_list);
         return $next($request);
     }
 }

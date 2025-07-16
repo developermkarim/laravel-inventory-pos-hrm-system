@@ -168,9 +168,8 @@
         <div role="document" class="modal-dialog">
             <div class="modal-content">
                 <form method="POST" action="http://127.0.0.1:8000/category/1" accept-charset="UTF-8"
-                    enctype="multipart/form-data"><input name="_method" type="hidden" value="PUT"><input
-                        name="_token" type="hidden" value="0qUVJZqy7uZVAWHQMtkTcVTCN8n6g0MLxjoseZzK">
-                    <div class="modal-header">
+                    enctype="multipart/form-data"><input name="_method" type="hidden" value="PUT">
+
                         <h5 id="exampleModalLabel" class="modal-title">Update Category</h5>
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
                                 aria-hidden="true"><i class="dripicons-cross"></i></span></button>
@@ -232,9 +231,9 @@
         class="modal fade text-left">
         <div role="document" class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" action="http://127.0.0.1:8000/category/import" accept-charset="UTF-8"
-                    enctype="multipart/form-data"><input name="_token" type="hidden"
-                        value="0qUVJZqy7uZVAWHQMtkTcVTCN8n6g0MLxjoseZzK">
+
+                {!!Form::open(['route' => 'category.import' ,'method' => 'post', 'files' => true]) !!}
+
                     <div class="modal-header">
                         <h5 id="exampleModalLabel" class="modal-title">Import Category</h5>
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
@@ -242,12 +241,14 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic"><small>The field labels marked with * are required input fields.</small></p>
+
                         <p>The correct column order is (name*, parent_category) and you must follow this.</p>
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Upload CSV File *</label>
-                                    <input class="form-control" required="" name="file" type="file">
+                                    {{Form::file('file', array('class' => 'form-control', 'required')) }}
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -260,8 +261,11 @@
                         </div>
                         <input type="submit" value="Submit" class="btn btn-primary">
                     </div>
-                </form>
+
             </div>
+
+            {!!Form::close() !!}
+
         </div>
     </div>
 @endsection

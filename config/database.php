@@ -93,6 +93,21 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        /* This Database just for Testing as if it works with another database. I will delete it later */
+
+        'salepro' => [
+            'driver' => 'mysql',
+            'host' => env('SALEPRO_DB_HOST' , '127.0.0.1'),
+            'port'=> env('SALEPRO_DB_PORT' , 3306),
+            'database' => env("SALEPRO_DB_DATABASE", 'salepro'),
+            'username' => env('SALEPRO_DB_USERNAME', 'root'),
+            'password' => env('SALEPRO_DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
     ],
 
     /*
