@@ -237,7 +237,7 @@ $general_setting = DB::table('general_settings')->first();
 
     </nav>
 
-     {{ $categories_list }}
+     {{-- {{ $categories_list }} --}}
 
 <div class="page">
         <!-- navbar-->
@@ -374,7 +374,7 @@ $general_setting = DB::table('general_settings')->first();
       <div id="category-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
           <div role="document" class="modal-dialog">
             <div class="modal-content">
-             {!! Form::open(['route' => 'category.store', 'method' => 'post', 'file' => true]) !!}
+             {!! Form::open(['route' => 'category.store', 'method' => 'post', 'files' => true]) !!}
               <div class="modal-header">
                 <h5 id="exampleModalLabel" class="modal-title">Add Category</h5>
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>

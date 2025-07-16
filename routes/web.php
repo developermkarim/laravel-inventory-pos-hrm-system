@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
+use Intervention\Image\Facades\Image;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +53,7 @@ Route::middleware("guest")->group(function(){
     Route::resource('category', CategoryController::class);
 
 });
+
 
 });
 

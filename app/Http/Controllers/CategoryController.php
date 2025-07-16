@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Intervention\Image\Image;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
 
 class CategoryController extends Controller
 {
@@ -38,85 +39,90 @@ class CategoryController extends Controller
 
     public function store(Request $request){
 
-        // dd($request->all(), $request);
+      $lims_category_data = [];
 
-        $request->name = preg_replace('/\s+/', ' ', $request->name); // long whitespace, tab or new line will be replaced single whitespace ' ' of the 3rd parameter $request->name;
-        $this->validate($request, [
-            'name' => [
-                'max:255',
-                Rule::unique('categories')->where(function ($query){
-                   return $query->where('is_active', 1);
-                }),
-            ],
-            'image' => 'image|mimes:jpg,jpeg,png,gif,webp',
-            'icon' => 'mimetypes:text/plain,image/png,image/jpeg,image/svg',
-        ]);
+   $name = preg_replace('/\s+/', ' ', $request->name);
 
-        $image = $request->image;
+$validator = \Validator::make($request->all(), [
+    'name' => [
+        'required',
+        'max:255',
+        Rule::unique('categories')->where(fn ($q) => $q->where('is_active', 1)),
+    ],
+    'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp',
+    // 'icon' => 'mimetypes:text/plain,image/png,image/jpeg,image/svg',
+]);
 
-        if($image){
 
-            $extension = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-            $imageName = date('Ymdhis');
-            if(!config('database.connections.saleproaas_landlord')){
 
-                $imageName = $imageName . '.' . $extension;
-                $image->move('public/images/category' , $imageName);
-            }
-
-            else{
-
-                $imageName = $this->getTenantId() . '_' . $imageName . '_' . $extension;
-                $image->move('public/images/category', $imageName);
-            }
-
-            Image::make('public/images/category/' . $imageName)->fit(100,100)->save();
-            $lims_category_data['image'] = $imageName;
-
-        }
-
-            $icon = $request->icon;
-
-            if($icon){
-
-             if(!file_exists(storage_path('publc/images/icons/'))){
-                mkdir('public/images/category', 0755, true);
-            }
-
-            $iconExt = pathinfo($icon->getClientOriginalName(), PATHINFO_EXTENSION);
-            $iconName = date('Ymdhis');
-            if(!config('database.connections.saleprosaas_landloard')){
-                $iconName = $iconName . '.'. $iconExt;
-                $icon->move('public/images/category/icons/' , $iconName);
-            }
-
-            else{
-
-                $iconName = $this->getTenantId() . '_' . $iconName . '_' .  $iconExt;
-                $icon->move('public/images/category/icons/', $iconName);
-            }
-
-            Image::make('public/images/category/' . $iconName)->fit(100,100)->save();
-            $lims_category_data['icon'] = $iconName;
-        }
-
-        $lims_category_data['name'] = $request->name;
-        $lims_category_data['parent_id'] = $request->parent_id;
-        $lims_category_data['is_active'] = true;
-
-        if(isset($request->is_sync_disable))
-
-            $lims_category_data['is_sync_disable'] = $request->is_sync_disable;
-
-            if(isset($request->slug))
-            $lims_category_data['slug'] = Str::slug($request->name, '-');
-            $lims_category_data['featured'] = $request->featured;
-            $lims_category_data['page_title'] = $request->page_title;
-            $lims_category_data['short_description'] = $request->short_description;
-
-            \DB::table('categories')->insert($lims_category_data);
-            $this->cacheForget('category_list');
-            return redirect('category')->with('message','Category inserted successfully');
-        }
+    if($validator->fails()){
+        // dd($validator->errors());
+        return redirect()->back()->withErrors($validator)->withInput();
 
     }
+
+
+$isLandlord = config('database.default') === 'saleprosaas_landlord';
+
+if ($request->hasFile('image')) {
+    $image = $request->file('image');
+    $extension = $image->getClientOriginalExtension();
+    $imageName = $isLandlord
+        ? $this->getTenantId() . '_' . date('Ymdhis') . '.' . $extension
+        : date('Ymdhis') . '.' . $extension;
+    $image->move(public_path('images/category'), $imageName);
+    Image::make(public_path('images/category/' . $imageName))->fit(100, 100)->save();
+    $lims_category_data['image'] = $imageName;
+}
+
+
+if ($request->hasFile('icon')) {
+    if (!file_exists(public_path('images/category/icons'))) {
+        mkdir(public_path('images/category/icons'), 0755, true);
+    }
+    $icon = $request->file('icon');
+    $iconExt = $icon->getClientOriginalExtension();
+    $iconName = $isLandlord
+        ? $this->getTenantId() . '_' . date('Ymdhis') . '.' . $iconExt
+        : date('Ymdhis') . '.' . $iconExt;
+
+    $icon->move(public_path('images/category/icons'), $iconName);
+
+    Image::make(public_path('images/category/icons/' . $iconName))->fit(100, 100)->save();
+    $lims_category_data['icon'] = $iconName;
+}
+
+$lims_category_data['name'] = $name;
+$lims_category_data['parent_id'] = $request->parent_id;
+$lims_category_data['is_active'] = true;
+
+
+if ($request->has('is_sync_disable')) {
+    $lims_category_data['is_sync_disable'] = $request->is_sync_disable;
+}
+
+if ($request->filled('slug')) {
+    $lims_category_data['slug'] = Str::slug($name, '-');
+    $lims_category_data['featured'] = $request->featured;
+    $lims_category_data['page_title'] = $request->page_title;
+    $lims_category_data['short_description'] = $request->short_description;
+}
+
+try {
+    $inserted = DB::table('categories')->insert($lims_category_data);
+    if (!$inserted) {
+        dd('Insert failed', );
+    }
+} catch (\Exception $e) {
+
+    $this->cacheForget('category_list');
+    
+    // dd('Insert error', $e->getMessage());
+}
+
+return redirect('category')->with('message', 'Category inserted Successfully');
+
+ }
+
+
+}
