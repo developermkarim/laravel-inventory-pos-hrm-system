@@ -20,8 +20,6 @@ class HomeController extends Controller
         return view("backend.index");
     }
 
-
-
     /* To do Dark Mode to Light Mode or Light To Dark */
 
    public function switchTheme($theme){

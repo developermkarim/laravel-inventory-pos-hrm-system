@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LangaugaeController;
 use Intervention\Image\Facades\Image;
 
 
@@ -36,6 +37,10 @@ Route::middleware("guest")->group(function(){
 
 
  Route::group(['middleware' => ['auth', 'common']], function() {
+
+    Route::controller(LangaugaeController::class)->group(function(){
+        Route::get('language-switch/{locale}' , 'switchLangauge')->name('language.switch');
+    });
 
     Route::controller(HomeController::class)->group(function(){
 

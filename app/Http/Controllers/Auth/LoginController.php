@@ -13,6 +13,14 @@ class LoginController extends Controller
 {
     public function login(){
 
+
+
+        if(isset($_COOKIE['language']))
+            \App::setLocale($_COOKIE['language']);
+        else
+            \App::setLocale('en');
+        //getting theme
+
         /* Theme Dark Mode Or Light Mode Switching */
 
         if(isset($_COOKIE['theme']))

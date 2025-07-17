@@ -36,6 +36,18 @@ class Common
 
             View::share('theme', 'light');
         }
+        
+
+        //setting language and Changing the locale
+          if(isset($_COOKIE['language'])){
+            app()->setLocale($_COOKIE['language']);
+          }elseif(auth()->check() && auth()->user()->preferred_locale){
+            app()->setLocale(auth()->user()->preferred_locale);
+          }
+          else{
+            app()->setLocale('en');
+          }
+
 
         View::share('general_setting', $general_setting);
 

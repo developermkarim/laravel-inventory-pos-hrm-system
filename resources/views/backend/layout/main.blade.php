@@ -270,15 +270,16 @@ $general_setting = DB::table('general_settings')->first();
                             <li class="nav-item"><a href="http://127.0.0.1:8000/cash-register" data-toggle="tooltip" title="" data-original-title="Cash Register List"><i class="dripicons-archive"></i></a></li>
 
 <li class="nav-item dropdown">
-    <a href="#" class="nav-link dropdown-toggle" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Language">
+    <a href="#" class="nav-link dropdown-toggle" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{ trans('file.language') }}">
         <i class="dripicons-web"></i>
     </a>
 
     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="languageDropdown">
-        <a class="dropdown-item" href="http://127.0.0.1:8000/language_switch/en">English</a>
-        <a class="dropdown-item" href="#">Espanol</a>
-        <a class="dropdown-item" href="#">Bangla</a>
+        <a class="dropdown-item" href="{{ route('language.switch' , 'en') }}">English</a>
+        <a class="dropdown-item" href="{{ route('language.switch' , 'es') }}">Espanol</a>
+        <a class="dropdown-item" href="{{ route('language.switch' , 'ar') }}">عربى</a>
     </div>
+
 </li>
 
 
@@ -288,13 +289,19 @@ $general_setting = DB::table('general_settings')->first();
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
-                    <a class="dropdown-item" href="http://127.0.0.1:7000/user/profile/1"><i class="dripicons-user"></i> Profile</a>
-                    <a class="dropdown-item" href="http://127.0.0.1:7000/setting/general_setting"><i class="dripicons-gear"></i> Settings</a>
+
+                    <a class="dropdown-item" href="http://127.0.0.1:7000/user/profile/1"><i class="dripicons-user"></i> {{ trans('file.profile') }}</a>
+
+                    <a class="dropdown-item" href="http://127.0.0.1:7000/setting/general_setting"><i class="dripicons-gear"></i> {{ trans('file.settings') }}</a>
+
                     <a class="dropdown-item" href="http://127.0.0.1:7000/my-transactions/2025/07"><i class="dripicons-swap"></i> My Transactions</a>
+
                     <a class="dropdown-item" href="http://127.0.0.1:7000/holidays/my-holiday/2025/07"><i class="dripicons-vibrate"></i> My Holiday</a>
+
                     <a class="dropdown-item text-danger" href="http://127.0.0.1:7000/setting/empty-database" onclick="return confirm('Are you sure want to delete? If you do this all of your data will be lost.')">
                         <i class="dripicons-stack"></i> Empty Database
                     </a>
+                    
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="http://127.0.0.1:7000/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="dripicons-power"></i> Logout
@@ -1039,7 +1046,7 @@ document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
     if (!e.ctrlKey && !e.metaKey && e.key !== "Tab") {
         e.preventDefault();
     }
-    
+
     });
 
     function previewFile(file, container) {
