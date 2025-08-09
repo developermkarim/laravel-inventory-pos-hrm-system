@@ -294,14 +294,14 @@ $general_setting = DB::table('general_settings')->first();
 
                     <a class="dropdown-item" href="http://127.0.0.1:7000/setting/general_setting"><i class="dripicons-gear"></i> {{ trans('file.settings') }}</a>
 
-                    <a class="dropdown-item" href="http://127.0.0.1:7000/my-transactions/2025/07"><i class="dripicons-swap"></i> My Transactions</a>
+                    <a class="dropdown-item" href="http://127.0.0.1:7000/my-transactions/2025/07"><i class="dripicons-swap"></i>{{ trans('file.My Transactions') }}</a>
 
-                    <a class="dropdown-item" href="http://127.0.0.1:7000/holidays/my-holiday/2025/07"><i class="dripicons-vibrate"></i> My Holiday</a>
+                    <a class="dropdown-item" href="http://127.0.0.1:7000/holidays/my-holiday/2025/07"><i class="dripicons-vibrate"></i>{{ trans('file.My Holiday') }}</a>
 
                     <a class="dropdown-item text-danger" href="http://127.0.0.1:7000/setting/empty-database" onclick="return confirm('Are you sure want to delete? If you do this all of your data will be lost.')">
-                        <i class="dripicons-stack"></i> Empty Database
+                        <i class="dripicons-stack"></i> {{ trans('file.Empty Database') }}
                     </a>
-                    
+
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="http://127.0.0.1:7000/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="dripicons-power"></i> Logout
@@ -328,7 +328,7 @@ $general_setting = DB::table('general_settings')->first();
         <div class="container-fluid">
           <div class="row">
             <div class="col-sm-12">
-              <p>© SalePro | Developed By <span class="external">Lion Coders</span> | V 4.2.0</p>
+              <p>&copy; {{ $general_setting->site_title }} | Developed By <span class="external">{{ $general_setting->developed_by }}</span></p>
             </div>
           </div>
         </div>
@@ -999,31 +999,51 @@ document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
         dropZone.classList.remove('dragover');
     });
 
-    dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-            const file = e.dataTransfer.files[0];
-            input.files = e.dataTransfer.files;
-            previewFile(file, preview);
-        }
-    });
+// Drag and drop (only images)
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
 
-    // ✅ NEW: Paste from clipboard support
-    dropZone.addEventListener('paste', e => {
-        const items = (e.clipboardData || window.clipboardData).items;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const file = items[i].getAsFile();
-                if (file) {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    input.files = dataTransfer.files;
-                    previewFile(file, preview);
-                }
+    if (imageFile) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(imageFile);
+        input.files = dataTransfer.files;
+        previewFile(imageFile, preview);
+    } else {
+        alert('Only image drag & drop is allowed.');
+    }
+})
+
+// Paste from clipboard (only images)
+dropZone.addEventListener('paste', e => {
+    const items = (e.clipboardData || window.clipboardData).items;
+    let imageFound = false;
+
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+            const file = items[i].getAsFile();
+            if (file) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
+                previewFile(file, preview);
+                imageFound = true;
+                break; // Only one image handled
             }
         }
-    });
+    }
+
+    // ❌ If no image found, stop further processing
+    if (!imageFound) {
+        e.preventDefault(); // Prevent pasting into contenteditable or input
+        alert('Only image pasting is allowed.');
+    }
+});
+
+
+
+
 
     // Focus to enable paste event
     dropZone.addEventListener('focus', () => {
@@ -1049,15 +1069,16 @@ document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
 
     });
 
-    function previewFile(file, container) {
-        if (!file || !file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-            container.innerHTML = `<img src="${reader.result}" alt="Preview" class="img-fluid rounded mt-2">`;
-        };
-        reader.readAsDataURL(file);
-    }
+  function previewFile(file, previewElement) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        previewElement.innerHTML = `<img src="${reader.result}" class="img-fluid" style="max-height: 200px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
 });
+
 </script>
 
 
