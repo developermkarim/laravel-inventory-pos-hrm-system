@@ -862,6 +862,7 @@ $general_setting = DB::table('general_settings')->first();
         <script type="text/javascript" src="<?php echo asset('vendor/datatable/buttons.colVis.min.js') ?>"></script>
         <script type="text/javascript" src="<?php echo asset('vendor/datatable/buttons.html5.min.js') ?>"></script>
         <script type="text/javascript" src="<?php echo asset('vendor/datatable/buttons.printnew.js') ?>"></script>
+        <script type="text/javascript" src="<?php echo asset('vendor/datatable/buttons.print.min.js') ?>"></script>
 
         <script type="text/javascript" src="<?php echo asset('vendor/datatable/sum().js') ?>"></script>
         <script type="text/javascript" src="<?php echo asset('vendor/datatable/dataTables.checkboxes.min.js') ?>"></script>
@@ -915,6 +916,7 @@ $general_setting = DB::table('general_settings')->first();
         <script type="text/javascript" src="<?php echo asset('../../vendor/datatable/buttons.colVis.min.js') ?>"></script>
         <script type="text/javascript" src="<?php echo asset('../../vendor/datatable/buttons.html5.min.js') ?>"></script>
         <script type="text/javascript" src="<?php echo asset('../../vendor/datatable/buttons.printnew.js') ?>"></script>
+        <script type="text/javascript" src="<?php echo asset('../../vendor/datatable/buttons.print.min.js') ?>"></script>
 
         <script type="text/javascript" src="<?php echo asset('../../vendor/datatable/sum().js') ?>"></script>
         <script type="text/javascript" src="<?php echo asset('../../vendor/datatable/dataTables.checkboxes.min.js') ?>"></script>
@@ -924,8 +926,8 @@ $general_setting = DB::table('general_settings')->first();
         @endif
     @endif
 
-    @stack('scripts')
 
+    @stack('scripts')
 
      <script type="text/javascript">
 
@@ -963,26 +965,20 @@ $general_setting = DB::table('general_settings')->first();
             });
         });
 
-     </script>
 
 
-    <script>
+                function myFunction(){
+                    setTimeout(showPage, 100)
+                }
 
-               function myFunction(){
-            setTimeout(showPage, 100)
-        }
-
-        function showPage(){
-            document.getElementById("loader").style.display = "none";
-            document.getElementById("content").style.display = "block";
-        }
+                function showPage(){
+                    document.getElementById("loader").style.display = "none";
+                    document.getElementById("content").style.display = "block";
+                }
 
 
-        </script>
 
-
-        <script>
-document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
+    document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
     const input = dropZone.querySelector('input');
     const preview = dropZone.querySelector('.preview');
 
@@ -1040,9 +1036,6 @@ dropZone.addEventListener('paste', e => {
         alert('Only image pasting is allowed.');
     }
 });
-
-
-
 
 
     // Focus to enable paste event

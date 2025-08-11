@@ -50,9 +50,11 @@ Route::middleware("guest")->group(function(){
 
     Route::post('/logout', [LoginController::class,'logout'])->name('logout');
 
-    Route::controller(CategoryController::class)->group(function(){
+    Route::prefix('category/')->controller(CategoryController::class)->group(function(){
 
         Route::post('import' , 'import')->name('category.import');
+
+        Route::post('category-data', 'categoryData');
     });
 
     Route::resource('category', CategoryController::class);

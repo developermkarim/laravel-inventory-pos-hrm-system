@@ -165,3 +165,183 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+
+<script type="text/javascript">
+
+$('ul#product').siblings('a').attr('aria-expanded', 'true');
+$('ul#product').addClass('show');
+$('ul#product #category-menu').addClass('active');
+
+
+function confirmDelete(){
+    if(confirm('if you delete category, All products under this category will also be deleted. Are you sure want to delete?')){
+        return true;
+    }
+    return false;
+}
+
+/* Set Multiple Category Ids and user_verified from Env */
+var category_id = [];
+var user_verified = {{ json_encode(env('USER_VARIFIED')) }}
+/*  This is once csrf token setup for every request post/put/delete */
+
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content')
+    }
+});
+
+/* This is for Modal Edit */
+$(document).on('click' , '.open-EditCategoryDialog' , function(){
+
+});
+
+/* This is for Category Data loading and data deleting */
+    // console.log('this is for log testing');
+
+$('#category-table').DataTable({
+
+    "processing" : true,
+    "serverSide" : true,
+    "ajax" :{
+        url : 'category/category-data',
+        dataType : 'json',
+        type: 'post',
+    },
+    'createdRow': function(row, data, dataIndex){
+        $(row).attr('data-id' , data['id']);
+    },
+    'columns': [
+        {'data': 'key'},
+        {'data' : 'name'},
+        {'data' : 'parent_id'},
+        {'data' : 'number_of_product'},
+        {'data' : 'stock_qty'},
+        {'data' : 'stock_worth'},
+        {'data' : 'options'}
+
+    ],
+    'language' : {
+
+        'lengthMenu' : '_MENU_ {{ trans('file.records per page') }}',
+        'info' : '<small>{{ trans('file.Showing') }} _START_ - _END_ (_TOTAL_)</small>',
+        'search' : '{{ trans('file.Search') }}',
+
+        'paginate' : {
+            'previous' : '<i class="dripicons-chevron-left"></i>',
+            'next' : '<i class="dripicons-chevron-right"></i>'
+        }
+    },
+
+    order:[['2' , 'asc']],
+    'columnDefs' : [
+        {
+            "orderable" : false,
+            'tergets' : [0, 1, 3, 4, 5, 6]
+        },
+        {
+            'render' : function(data, type, row, meta){
+                if(type === 'display'){
+                    data = "<div class='checkbox'> <input type='checkbox' class='dt-checkboxes'> <label></label></div>";
+                }
+
+                return data;
+            },
+            'checkboxes' : {
+                'selectRow' : true,
+                'selectAllRender' : '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+            },
+            'tergets' : [0]
+        }
+    ],
+
+    'select' : {style : 'multi' , selector : 'td-first-child'},
+    'lengthMenu' : [[10 , 25, 50, -1] , [10, 25, 50, 'All']],
+    dom: '<"row"1fB>rtip',
+    buttons : [
+        {
+            extend : 'pdf',
+            text : '<i title="export to pdf" class="fa fa-file-pdf-o"></i>',
+            exportOptions : {
+                columns : ':visible:Not(.not-exported)' ,
+                rows : ':visible'
+            },
+            footer : true,
+        },
+        {
+            extend : 'excel',
+            text : '<i title="Export to excel" class="dripicons-document-new"></i>',
+            exportOptions : {
+                columns : ':visible:Not(.not-exported)',
+                rows : ':visible'
+            },
+            footer: true,
+        },
+        {
+        extend : 'csv',
+        text : '<i title="export to csv" class="fa fa-file-text-o"></i>',
+        exportOptions: {
+            columns : ':visible:Not(.not-exported)',
+            rows : ':visible'
+        },
+        footer: true
+        },
+       {
+                extend: 'print',
+                text: '<i title="print" class="fa fa-print"></i>',
+                exportOptions: {
+                    columns: ':visible:Not(.not-exported)',
+                    rows: ':visible'
+                },
+                footer:true
+            },
+
+        {
+            text : '<i title="delete" class="dripicons-cross"></i>',
+            className: 'buttons-delete',
+            action: function(e, dt, node, config){
+                if(user_verified = '1'){
+                    category_id.length = 0;
+                    $(':checkbox:checked').each(function(i){
+                        if(i){
+                            category_id[i-1] = $(this).closest('tr').data('id');
+                        }
+                    });
+                    if(category_id.length && confirm("If you delete category all products under this category will also be deleted. Are you sure wnat to delete")){
+                        $.ajax({
+                                type:'POST',
+                                url:'category/deletebyselection',
+                                data:{
+                                    categoryIdArray : category_id
+                                },
+                                success:function(data){
+                                    dt.rows({page: 'current' , selected: true}).deselect();
+                                    dt.rows({page: 'current' , selected: true}).remove().draw(false);
+                                }
+                        });
+                    }else if(!category_id.length){
+                        alert('No Category is selected');
+                    }
+                }
+                else{
+                    alert('This Feature is disable for demo');
+                }
+            }
+        },
+        {
+            extend: 'colvis',
+            text: '<i title="column visibility" class="fa fa-eye"></i>',
+            columns: ':gt(0)'
+        }
+
+
+    ]
+
+})
+
+</script>
+
+@endpush
+
