@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Traits\FileHandleTrait;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,6 +13,7 @@ use Intervention\Image\Facades\Image;
 class CategoryController extends Controller
 {
 
+    use FileHandleTrait;
 
     public function index(){
 
@@ -108,10 +110,10 @@ class CategoryController extends Controller
                 $totalCost = $category->product()->where('is_active' , true)->sum(DB::raw('cost * qty'));
 
                 if(config('currency_positon') == 'prefix')
-                $nestedData['stock_worth'] = config('currency_position') . ' ' . $totalPrice . ' / ' . config('currency_positon') . ' ' . $totalCost;
+                $nestedData['stock_worth'] = config('currency') . ' ' . $totalPrice . ' / ' . config('currency') . ' ' . $totalCost;
 
                 else
-                $nestedData['stock_worth'] = $totalPrice . ' ' . config('currency_position') . ' / ' . $totalCost . ' ' . config('currency_position');
+                $nestedData['stock_worth'] = $totalPrice . ' ' . config('currency') . ' / ' . $totalCost . ' ' . config('currency');
 
 
                 $nestedData['options'] = '<div class="btn-group">
@@ -129,7 +131,7 @@ class CategoryController extends Controller
                                 <li class="divider"></li>
                                  '. \Form::open(['route' => ['category.destroy', $category->id] , 'method' => "DELETE"]) .'
                                 <li>
-                                <button type="submit" class="btn btn-link" onclick="return confirmDelete()"></button>
+                                <button type="submit" class="btn btn-link" onclick="return confirmDelete()">'. trans('file.delete') .'</button>
                                 </li>' .
                                 \Form::close() .
                                 '</ul>
@@ -169,12 +171,9 @@ $validator = \Validator::make($request->all(), [
     // 'icon' => 'mimetypes:text/plain,image/png,image/jpeg,image/svg',
 ]);
 
-
-
     if($validator->fails()){
         // dd($validator->errors());
         return redirect()->back()->withErrors($validator)->withInput();
-
     }
 
 
@@ -187,7 +186,7 @@ if ($request->hasFile('image')) {
         ? $this->getTenantId() . '_' . date('Ymdhis') . '.' . $extension
         : date('Ymdhis') . '.' . $extension;
     $image->move(public_path('images/category'), $imageName);
-    Image::make(public_path('images/category/' . $imageName))->fit(100, 100)->save();
+    Image::make(public_path('images/category/' . $imageName))->fit(300, 100)->save();
     $lims_category_data['image'] = $imageName;
 }
 
@@ -240,5 +239,170 @@ return redirect('category')->with('message', 'Category inserted Successfully');
 
  }
 
+ public function edit($id){
+
+$lims_category_data = (array) DB::table('categories')->where('id', $id)->first();
+        $lims_parent_data = (array) DB::table('categories')->where('id', $lims_category_data['parent_id'])->first();
+
+        if($lims_parent_data)
+            $lims_category_data['parent'] = $lims_parent_data['name'];
+
+        return $lims_category_data;
+
+ }
+
+public function update(Request $request)
+{
+    // dd($request->all());
+
+      /*  if(! (int) env('USER_VERIFIED', 1)){
+        //  dd($request->all());
+            return redirect()->back()->with('not_permitted', 'This feature is disable for demo!');
+       } */
+
+    //    dd('all the inputs', $request->all());
+
+  $this->validate($request,[
+    'name' => [
+        'required',
+        'max:255',
+        Rule::unique('categories')->ignore($request->category_id)->where(function ($query){
+            return $query->where('is_active', 1);
+        })
+    ],
+    'image'=> 'image|mimes:jpg,jpeg,png,gif,webp',
+    'icon' => 'mimetypes:text/plain,image/png,image/jpeg,image/svg',
+  ]);
+
+  $lims_category_data = DB::table('categories')->where('id', $request->category_id)->first();
+
+  $input = $request->except(['_token', '_method', 'image', 'icon', 'category_id']);
+
+  if($request->Hasfile('image')){
+
+    $this->fileDelete(');images/category/', $lims_category_data->image);
+
+    $extention = pathinfo($request->file('image')->getClientOriginalName(), PATHINFO_EXTENSION);
+
+    $imageName = date('Ymdhis');
+
+    if(!config('database.connections.saleprosass_landlord'))
+    {
+        $imageName = $imageName . '.' . $extention;
+        $request->file('image')->move(public_path('images/category'), $imageName);
+    }
+
+    else{
+        $imageName = $this->getTenantId() . '_' . $imageName . '.' . $extention;
+        $request->file('image')->move(public_path('images/category'), $imageName);
+    }
+
+    Image::make(public_path('images/category/' . $imageName))->fit(100, 100)->save();
+
+    $input['image'] = $imageName;
+
+  }
+
+  if($request->hasFile('icon')){
+
+    if(!file_exists(public_path('images/category/icons/'))){
+       mkdir(public_path('images/category/icons'), 0755, true);
+    }
+
+    $this->fileDelete('images/category/icons/', $lims_category_data->icon);
+
+    $extension = pathinfo($request->file('icon')->getClientOriginalName(), PATHINFO_EXTENSION);
+        $iconName = date('Ymdhis');
+
+    if(!config('database.connections.saleprosass_landlord')){
+        $iconName = $iconName . '.' . $extension;
+        $request->file('icon')->move(public_path('images/category/icons'), $iconName);
+    } else {
+        $iconName = $this->getTenantId() . '_' . $iconName . '.' . $extension;
+        $request->file('icon')->move(public_path('images/category/icons'), $iconName);
+    }
+    Image::make(public_path('images/category/icons/' . $iconName))->fit(100, 100)->save();
+
+    $input['icon'] = $iconName;
+
 
 }
+
+    if(!isset($request->featured) && \Schema::hasColumn('categories', 'featured')){
+
+        $input['featured'] = 0;
+    }
+
+    if(!isset($input['is_sync_disable']) && \Schema::hasColumn('categories', 'is_sync_disable')){
+
+        $input['is_sync_disable'] = null;
+    }
+
+    DB::table('categories')->where('id', $request->category_id)->update($input);
+
+    return redirect('category')->with('message', 'Category updated Successfully');
+}
+
+public function import(Request $request){
+
+    // dd($request->all());
+
+    $uploadedFile = $request->file('file');
+
+    $filePath = pathinfo($uploadedFile->getClientOriginalName(),    PATHINFO_EXTENSION);
+
+    // dd($filePath);
+    if($filePath != 'csv'){
+        return redirect()->back()->with('not_permitted', 'Please upload a valid CSV file.');
+    }
+
+    $filename = $uploadedFile->getClientOriginalName();
+    $filePath= $uploadedFile->getRealPath();
+    $fileOpen = fopen($filePath, 'r');
+
+    $header = fgetcsv($fileOpen);
+    $escapedHeader = [];
+    foreach($header as $key => $value){
+
+        $header_value = strtolower(trim($value));
+        $escapedItem = preg_replace('/[^a-z]/', '', $header_value);
+
+        array_push($escapedHeader,  $escapedItem);
+    }
+
+    // dd($escapedHeader);
+    // Loopinh through the CSV file
+    while($columns = fgetcsv($fileOpen)){
+
+        if($columns[0] == null || $columns[0] == '')
+            continue;
+
+    $data = array_combine($escapedHeader, $columns);
+    $category = Category::firstOrNew(['name' => $data['name'], 'is_active' => true]);
+
+    if($data['parentcategory']){
+        $parentCategory = Category::firstOrNew(['name' => $data['parentcategory'], 'is_active' => true]);
+
+        $parent_id = $parentCategory->id;
+    }
+    else{
+        $parent_id = null;
+    }
+
+    $category->parent_id = $parent_id;
+    $category->is_active = true;
+    $category->save();
+}
+
+     fclose($fileOpen);
+    // dd( cache('category_list'));
+// dd($data, $fileOpen, $escapedHeader);
+cache()->forget('category_list');
+
+    //    dd('This forget Cache'. cache('category_list'));
+    return redirect()->back()->with('message', 'Category imported successfully');
+}
+
+}
+
+

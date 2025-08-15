@@ -9,10 +9,11 @@ class Category extends Model
 {
     use HasFactory; // it is  used for factory data and seeding data into Database.
 
-
+// protected $connection = 'salepro';
     protected $guarded = [];
 
-    public function product(){
+    public function product()
+    {
 
         return $this->hasMany(Product::class);
     }

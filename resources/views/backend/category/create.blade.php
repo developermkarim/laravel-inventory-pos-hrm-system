@@ -55,61 +55,92 @@
 
     {{-- Edit Modal Here --}}
 
-    <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
-        class="modal fade text-left">
-        <div role="document" class="modal-dialog">
+   <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
+     <div role="document" class="modal-dialog">
             <div class="modal-content">
 
-                {{Form::open(['route' => ['category.update' , 1], 'method' => 'PUT', 'files' => true]) }}
+                {{Form::open(['route' => ['category.update', 1], 'method' => 'PUT', 'files' => true]) }}
 
-                <h5 id="exampleModalLabel" class="modal-title">Update Category</h5>
-                        <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
-                                aria-hidden="true"><i class="dripicons-cross"></i></span></button>
-                    </div>
+                 <div class="modal-header">
+                    <h5 id="exampleModalLabel" class="modal-title">{{trans('file.Update Category')}}</h5>
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
+                </div>
                     <div class="modal-body">
-                        <p class="italic"><small>The field labels marked with * are required input fields.</small></p>
+                        <p class="italic"><small>{{ trans('file.The field labels marked with * are required input fields') }}</small></p>
                         <div class="row">
                             <div class="col-md-6 form-group">
-                                <label>Name *</label>
-                                <input required="required" class="form-control" name="name" type="text">
+                                <label>{{trans('file.name')}} *</label>
+                               {{--  <input required="required" class="form-control" name="name" type="text"> --}}
+                                {{Form::text('name', null, array('required' => 'required', 'class' => 'form-control'))}}
                             </div>
                             <input type="hidden" name="category_id">
                             <div class="col-md-6 form-group">
-                                <label>Image</label>
-                                <input type="file" name="image" class="form-control">
+                                <label>{{trans('file.Image')}}</label>
+                                 <x-file-upload name="image" id="main-image"  label="Upload Category Image" />
+
+                                 <img src="" id="update_image" width="80" height="80" alt="">
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>Parent Category</label>
-                                <div class="btn-group bootstrap-select form-control"><button type="button"
-                                        class="btn dropdown-toggle bs-placeholder btn-link" data-toggle="dropdown"
-                                        role="button" data-id="parent" title="No Parent"><span
-                                            class="filter-option pull-left">No Parent</span>&nbsp;<span
-                                            class="bs-caret"><span class="caret"></span></span></button>
-                                    <div class="dropdown-menu open" role="combobox">
-                                        <div class="dropdown-menu inner" role="listbox" aria-expanded="false"><a
-                                                tabindex="0" class="dropdown-item selected"
-                                                data-original-index="0"><span class="dropdown-item-inner "
-                                                    data-tokens="null" role="option" tabindex="0"
-                                                    aria-disabled="false" aria-selected="true"><span class="text">No
-                                                        Parent</span><span
-                                                        class="fa fa-check check-mark"></span></span></a><a tabindex="0"
-                                                class="dropdown-item" data-original-index="1"><span
-                                                    class="dropdown-item-inner " data-tokens="null" role="option"
-                                                    tabindex="0" aria-disabled="false" aria-selected="false"><span
-                                                        class="text">Electronics</span><span
-                                                        class="fa fa-check check-mark"></span></span></a></div>
-                                    </div><select name="parent_id" class="form-control selectpicker" id="parent"
+                             <label>{{trans('file.Parent Category')}}</label>
+
+                               <select name="parent_id" class="form-control selectpicker" id="parent"
                                         tabindex="-98">
-                                        <option value="">No Parent</option>
+                                        <option value="">No {{ trans('file.parent') }}</option>
                                         @foreach ($categories_list as $category)
 
                                         <option value="{{ $category->id }}">{{ $category->name }}</option>
 
                                         @endforeach
                                     </select>
+
                                 </div>
+
+                                @if(\Schema::hasColumn('categories', 'woocommerce_category_id'))
+                                    <div class="col-md-6 form-group mt-4">
+
+                                    <h5><input name="is_sync_disable" type="checkbox" id="is_sync_disable" value="1">&nbsp; {{trans('file.Disable Woocommerce Sync')}}</h5>
+
                             </div>
-                        </div>
+                            @endif
+
+                            @if(in_array('ecommerce', explode(',', $general_setting->modules)))
+
+                             <div class="col-md-12 mt-3">
+                <h6><strong>{{ __('For Website') }}</strong></h6>
+                <hr>
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label>{{ __('Icon') }} (SVG format)</label>
+                <input type="file" name="icon" class="form-control">
+            </div>
+
+            <div class="col-md-6 form-group">
+                <br>
+               <input type="checkbox" name="featured" id="featured" value="1"> <label>{{ __('List on category dropdown') }}</label>
+            </div>
+
+
+            @endif
+
+                </div>
+
+                        @if(in_array('ecommerce',explode(',',$general_setting->modules)))
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <h6><strong>{{ __('For SEO') }}</strong></h6>
+                <hr>
+            </div>
+            <div class="col-md-12 form-group">
+                <label>{{ __('Meta Title') }}</label>
+                {{Form::text('page_title',null, array('class' => 'form-control', 'placeholder' => 'Meta Title...'))}}
+            </div>
+            <div class="col-md-12 form-group">
+                <label>{{ __('Meta Description') }}</label>
+                {{Form::text('short_description',null, array('class' => 'form-control', 'placeholder' => 'Meta Description...'))}}
+            </div>
+        </div>
+        @endif
 
                         <div class="form-group">
                             <input type="submit" value="Submit" class="btn btn-primary">
@@ -118,8 +149,7 @@
                 {{Form::close() }}
             </div>
         </div>
-    </div>
-
+ </div>
     {{-- Import Modal Here --}}
 
 
@@ -164,6 +194,8 @@
 
         </div>
     </div>
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -193,9 +225,73 @@ $.ajaxSetup({
     }
 });
 
+
+// Clear preview and file input when modal is hidden
+$('#editModal').on('hidden.bs.modal', function () {
+    // Only clear the file-drop-zone preview, not #update_image
+    $(this).find('.file-drop-zone .preview').empty();
+    $(this).find('input[type="file"]').val('');
+});
+
+    // Change from file input
+        $('#editModal input[name="image"]').on('change', function() {
+            $('#editModal img#update_image').remove();
+        });
+
+        // Drag & drop anywhere inside modal
+        $('#editModal').on('drop', function(e) {
+            e.preventDefault();
+            $('#editModal img#update_image').remove();
+        });
+
+        $('#editModal').on('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        // Paste image into modal
+        $('#editModal').on('paste', function(e) {
+            $('#editModal img#update_image').remove();
+        });
+
 /* This is for Modal Edit */
 $(document).on('click' , '.open-EditCategoryDialog' , function(){
 
+    $('#editModal input[name="is_sync_disable"]').prop('checked', false);
+    $('#editModal input[name="featured"]').prop('checked', false);
+
+    var url = 'category/';
+    var id = $(this).data('id').toString();
+    url = url.concat(id).concat('/edit');
+    console.log(url);
+
+    $.get(url, function(data){
+
+        $('#editModal input[name="name"]').val(data['name']);
+        // $('#editModal input[name="parent_id"]').val(data['parent_id']);
+        $('#editModal select[name="parent_id"]').val(data['parent_id']);
+        $('#editModal input[name="category_id"]').val(data['id']);
+
+       $('#editModal img#update_image')
+    .attr(
+        'src',
+        data['image']
+            ? 'images/category/' + data['image']
+            : 'images/zummXD2dvAtI.png'
+    );
+
+
+        if(data['is_sync_disable']){
+            $('#ditModal input[name="is_sync_disable"]').prop('checked', true);
+        }
+
+        if(data['featured']){
+            $('#editModal input[name="name"]').prop('checked', true);
+        }
+
+        $('#editModal input[name="page_title"]').val(data['page_title']);
+        $('#editModal input[name="short_description"]').val(data['short_description']);
+        $('.selectpicker').selectpicker('refresh');
+    })
 });
 
 /* This is for Category Data loading and data deleting */

@@ -979,8 +979,8 @@ $general_setting = DB::table('general_settings')->first();
 
 
     document.querySelectorAll('.file-drop-zone').forEach(dropZone => {
-    const input = dropZone.querySelector('input');
-    const preview = dropZone.querySelector('.preview');
+        const input = dropZone.querySelector('input');
+        const preview = dropZone.querySelector('.preview');
 
     dropZone.addEventListener('click', () => {
         input.click();
@@ -1023,7 +1023,7 @@ dropZone.addEventListener('paste', e => {
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 input.files = dataTransfer.files;
-                previewFile(file, preview);
+                // previewFile(file, preview);
                 imageFound = true;
                 break; // Only one image handled
             }
